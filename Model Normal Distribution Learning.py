@@ -165,6 +165,9 @@ def train():
         if epoch % print_interval == 0:
             print("Epoch %s: D (%s real_err, %s fake_err) G (%s err); Real Dist (%s),  Fake Dist (%s) " %
                   (epoch, dre, dfe, ge, stats(extract(d_real_data)), stats(extract(d_fake_data))))
+            values = extract(g_fake_data)
+            plt.hist(values, bins=50)
+            plt.show()
 
     if matplotlib_is_available:
         print("Plotting the generated distribution...")

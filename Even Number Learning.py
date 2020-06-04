@@ -59,6 +59,8 @@ def train(max_int: int = 128, batch_size: int = 16, training_steps: int = 500):
     # loss
     loss = nn.BCELoss()
 
+    print_interval = 50
+
     for i in range(training_steps):
         # zero the gradients on each iteration
         generator_optimizer.zero_grad()
@@ -92,3 +94,7 @@ def train(max_int: int = 128, batch_size: int = 16, training_steps: int = 500):
         discriminator_loss = (true_discriminator_loss + generator_discriminator_loss) / 2
         discriminator_loss.backward()
         discriminator_optimizer.step()
+
+        if i % print_interval == 0:
+            print(generated_data)
+
