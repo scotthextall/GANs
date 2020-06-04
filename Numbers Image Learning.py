@@ -1,11 +1,11 @@
 import torch
 import torch.optim as optim
 import torch.nn as nn
-import torch.nn.functional as F #Loss Function
+import torch.nn.functional as F     # Loss Function
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision
-import torchvision.transforms as transforms #Datasets
+import torchvision.transforms as transforms     # Datasets
 
 #   Mini-batch size
 mb_size = 64
