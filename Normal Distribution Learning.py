@@ -17,11 +17,20 @@ dataset = np.random.normal(mean, std_dev, 1000)
 plt.hist(np.random.normal(mean, std_dev, 1000), 50, density=True)
 plt.show()
 
-#   Function to generate random normal distribution training data on the go.
-def generate_trainset(mu, sigma, n):
+
+#   Function to generate random normal distribution training data on the go. Also creates '1' labels to show it's real.
+def get_trainset(mu, sigma, n, batch_size):
     data = np.random.normal(mu, sigma, n)
     trainset = torch.tensor(data)
-    print(trainset)
+    labels = [1] * batch_size
+    return labels, trainset
+
+
+#   Function to create inputs to pass into generator. Generator will output fake data.
+#   Linear inputs generated to make it more difficult for generator to trick discriminator.
+def get_generator_input(m, n):
+    generator_input = torch.rand(m, n)
+    return generator_input
 
 
 #   Building the Generator. Simple, single n neuron layer.
@@ -53,6 +62,8 @@ def train():
     #   Parameters
     n = 100     # Size of the training set and number of neurons in the single layer Generator nn.
     lr = 1e-3   # Learning rate of the optimisers/models.
+    training_steps = 1   # Number of iterations to train models on.
+    batch_size = 50     # Batch size to sample data for generator.
 
     #   Initialising the Models
     G = Generator(n)
@@ -61,6 +72,43 @@ def train():
     #   Optimisers
     g_optimiser = torch.optim.Adam(G.parameters(), lr=lr)
     d_optimiser = torch.optim.Adam(D.parameters(), lr=lr)
+
+    #   Loss
+    loss = nn.BCELoss()
+
+    for i in range(training_steps):
+        #   Zero the gradients on each iteration.
+        g_optimiser.zero_grad()
+
+        #   Creating random inputs for generator.
+        g_input = get_generator_input(batch_size, n).float()
+        generated_data = G(g_input)
+
+        #   Generate examples of real data.
+        real_labels, real_data = get_trainset(mean, std_dev, n, batch_size)
+        real_labels = torch.tensor(real_labels).float()
+        real_data = torch.tensor(real_data).float()
+        print(real_labels.size())
+
+        """#   Training the generator. Check understanding of this bit.
+        generator_discriminator_out = D(generated_data)
+        g_loss = loss(generator_discriminator_out, real_labels)
+        g_loss.backward()
+        g_optimiser.step()
+
+        #   Training the discriminator on the true vs generated data.
+        d_optimiser.zero_grad()
+        real_d_out = D(real_data)
+        real_d_loss = loss(real_d_out, real_labels)
+
+        #   Add .detach() to re-run loop.
+        generator_discriminator_out = D(generated_data.detach())
+        generator_discriminator_loss = loss(generator_discriminator_out, torch.zeros(batch_size))
+        d_loss = (real_d_loss + generator_discriminator_loss) / 2
+        d_loss.backward()
+        d_optimiser.step()"""
+
+train()
 
 
 
