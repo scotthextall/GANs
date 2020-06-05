@@ -11,7 +11,7 @@ import numpy as np
 batch_size = 1000
 
 #   Creating normal distribution training set using Numpy.
-trainset = np.random.normal(2, 1, 1000000)
+trainset = np.random.normal(2, 1, 10000000)
 
 plt.hist(trainset, 100, density=True)
 plt.show()
@@ -115,13 +115,13 @@ loss = nn.BCELoss()
 
 #   Functions to create labels of 1s and 0s with shape = size. 1 = real, 0 = fake.
 def ones_target(size):
-    data = torch.ones(size, 1)
-    return data
+    ones = torch.ones(size, 1)
+    return ones
 
 
 def zeros_target(size):
-    data = torch.zeros(size, 1)
-    return data
+    zeros = torch.zeros(size, 1)
+    return zeros
 
 
 #   Training the discriminator.
@@ -158,7 +158,8 @@ def train_generator(optimiser, fake_data):
     optimiser.zero_grad()
 
     #   Take a noise sample input and use it to generate fake data.
-    prediction = G(fake_data)
+    #   Use discriminator to predict whether its real (1) or fake (0).
+    prediction = D(fake_data)
 
     #   Calculate error and back-propagate.
     error = loss(prediction, ones_target(size))
@@ -169,6 +170,21 @@ def train_generator(optimiser, fake_data):
 
     #   Return error.
     return error
+
+
+#   Total number of epochs to train on.
+num_epochs = 1000
+
+#   Training loop.
+for epoch in range(num_epochs):
+    for real_batch in trainloader:
+        #   Size of the batch of real data obtained from the trainloader.
+        size = real_batch.size(0)
+
+        #   1) Train Discriminator.
+        real_data = real_batch
+
+        #   Generate fake data and detahc.
 
 
 
