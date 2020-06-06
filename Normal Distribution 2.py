@@ -11,27 +11,27 @@ import numpy as np
 batch_size = 1000
 
 #   Creating normal distribution training set using Numpy.
-trainset = np.random.normal(2, 1, 10000)
+dataset = np.random.normal(2, 1, 100000)
 
-plt.hist(trainset, 100, density=True)
+plt.hist(dataset, 100, density=True)
 plt.show()
 
 #   Converting training set to a Tensor.
-trainset = torch.from_numpy(trainset)
+dataset = torch.from_numpy(dataset)
 
 #   Loader that can iterate through and load data one mini batch at a time.
-trainloader = torch.utils.data.DataLoader(trainset, shuffle=True, batch_size=batch_size)
+dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=batch_size)
 
 """Visualisation"""
 
 #   Define an iterator.
-data_iter = iter(trainloader)
+data_iter = iter(dataloader)
 
 #   Getting next sample batch of the data.
-values = data_iter.next()
+test = data_iter.next()
 
 #   Plotting mini-batch histogram.
-plt.hist(values, 10, density=True)
+plt.hist(test, 10, density=True)
 plt.show()
 
 """Models"""
@@ -173,8 +173,8 @@ def train_generator(optimiser, fake_data):
 num_epochs = 100
 
 #   Training loop.
-for epoch in range(num_epochs):
-    for real_batch in trainloader:
+"""for epoch in range(num_epochs):
+    for real_batch in dataloader:
         #   Size of the batch of real data obtained from the trainloader.
         size = real_batch.size(0)
 
@@ -196,7 +196,7 @@ for epoch in range(num_epochs):
 
     if epoch % 10 == 0:
         plt.hist(fake_data.detach().numpy(), 10, density=True)
-        plt.show()
+        plt.show()"""
 
 
 

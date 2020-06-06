@@ -28,6 +28,7 @@ data_iter = iter(trainloader)
 images, labels = data_iter.next()
 test = images.view(images.size(0), -1)
 print(test.size())
+print(images)
 
 Z_dim = 100
 X_dim = test.size(1)
