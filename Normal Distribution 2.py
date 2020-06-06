@@ -11,7 +11,7 @@ import numpy as np
 batch_size = 1000
 
 #   Creating normal distribution training set using Numpy.
-trainset = np.random.normal(2, 1, 10000000)
+trainset = np.random.normal(2, 1, 10000)
 
 plt.hist(trainset, 100, density=True)
 plt.show()
@@ -170,7 +170,7 @@ def train_generator(optimiser, fake_data):
 
 
 #   Total number of epochs to train on.
-num_epochs = 1000
+num_epochs = 100
 
 #   Training loop.
 for epoch in range(num_epochs):
@@ -194,8 +194,9 @@ for epoch in range(num_epochs):
         #   Train G
         g_error = train_generator(g_optimiser, fake_data)
 
-    plt.hist(fake_data.detach().numpy(), 10, density=True)
-    plt.show()
+    if epoch % 10 == 0:
+        plt.hist(fake_data.detach().numpy(), 10, density=True)
+        plt.show()
 
 
 
