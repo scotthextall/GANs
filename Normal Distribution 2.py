@@ -8,6 +8,7 @@ import numpy as np
 """Generating and Loading Data"""
 
 #   Batch size when loading samples to train on.
+#   No need for batches in this case.
 batch_size = 1000
 
 #   Creating normal distribution training set using Numpy.
@@ -173,9 +174,9 @@ def train_generator(optimiser, fake_data):
 num_epochs = 100
 
 #   Training loop.
-"""for epoch in range(num_epochs):
+for epoch in range(num_epochs):
     for real_batch in dataloader:
-        #   Size of the batch of real data obtained from the trainloader.
+        #   Size of the batch of real data obtained from the dataloader.
         size = real_batch.size(0)
 
         #   1) Train Discriminator.
@@ -196,7 +197,7 @@ num_epochs = 100
 
     if epoch % 10 == 0:
         plt.hist(fake_data.detach().numpy(), 10, density=True)
-        plt.show()"""
+        plt.show()
 
 
 
