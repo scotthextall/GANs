@@ -7,8 +7,8 @@ import numpy as np
 
 """Generating and Loading Data"""
 
+"""
 #   Batch size when loading samples to train on.
-#   No need for batches in this case.
 batch_size = 1000
 
 #   Creating normal distribution training set using Numpy.
@@ -22,9 +22,19 @@ dataset = torch.from_numpy(dataset)
 
 #   Loader that can iterate through and load data one mini batch at a time.
 dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=batch_size)
+"""
+
+
+#   Generating real data samples from the normal distribution we wish to find.
+def get_real_data(mu, sigma):
+    data = np.random.normal(mu, sigma, 10000)
+    return data
+
+
 
 """Visualisation"""
 
+"""
 #   Define an iterator.
 data_iter = iter(dataloader)
 
@@ -32,6 +42,11 @@ data_iter = iter(dataloader)
 test = data_iter.next()
 
 #   Plotting mini-batch histogram.
+plt.hist(test, 10, density=True)
+plt.show()
+"""
+
+test = get_real_data(5, 1)
 plt.hist(test, 10, density=True)
 plt.show()
 
@@ -199,42 +214,6 @@ for epoch in range(num_epochs):
         plt.hist(fake_data.detach().numpy(), 10, density=True)
         plt.show()
 
-
-
-
-"""for epoch in range(num_epochs):
-    for real_batch in trainloader:
-        print(real_batch)
-        # 1. Train D on real+fake
-        D.zero_grad()
-
-        #  1A: Train D on real data
-        d_real_data = D(real_batch.float())
-        d_real_prediction = D(d_real_data)
-        d_real_error = loss(d_real_prediction, torch.ones([1, 1]))  # ones = true
-        d_real_error.backward()  # compute/store gradients, but don't change params
-        print(d_real_data)
-    
-        #  1B: Train D on fake
-        d_gen_input = noise(batch_size, g_input_size)
-        d_fake_data = G(d_gen_input).detach()  # detach to avoid training G on these labels
-        d_fake_prediction = D(d_fake_data)
-        d_fake_error = loss(d_fake_prediction, torch.zeros([1, 1]))  # zeros = fake
-        d_fake_error.backward()
-        d_optimiser.step()  # Only optimizes D's parameters; changes based on stored gradients from backward()
-        print(d_fake_data)
-    
-        # 2. Train G on D's response (but DO NOT train D on these labels)
-        G.zero_grad()
-    
-        gen_input = noise(batch_size, g_input_size)
-        g_fake_data = G(gen_input)
-        dg_fake_decision = D(g_fake_data)
-        g_error = loss(dg_fake_decision, torch.ones([1, 1]))  # Train G to pretend it's genuine
-        print(g_fake_data)
-    
-        g_error.backward()
-        g_optimiser.step()  # Only optimizes G's parameters"""
 
 
 
