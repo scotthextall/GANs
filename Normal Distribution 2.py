@@ -18,11 +18,9 @@ plt.show()
 
 #   Converting training set to a Tensor.
 trainset = torch.from_numpy(trainset)
-print(trainset)
 
 #   Loader that can iterate through and load data one mini batch at a time.
 trainloader = torch.utils.data.DataLoader(trainset, shuffle=True, batch_size=batch_size)
-print(len(trainloader))
 
 """Visualisation"""
 
@@ -31,7 +29,6 @@ data_iter = iter(trainloader)
 
 #   Getting next sample batch of the data.
 values = data_iter.next()
-print(values)
 
 #   Plotting mini-batch histogram.
 plt.hist(values, 10, density=True)
@@ -74,9 +71,9 @@ class Discriminator(nn.Module):
 
 
 #   Function to create random noise. 1D vector of gaussian sampled random values.
-def noise(size):
-    n = torch.randn(size, 100)
-    return n
+def noise(m, n):
+    random_input = torch.randn(m, n)
+    return random_input
 
 
 """Training the Models"""
@@ -132,15 +129,15 @@ def train_discriminator(optimiser, real_data, fake_data):
     optimiser.zero_grad()
 
     #   1) Train on real data.
-    prediction_real = D(real_data)
+    prediction_real = D(real_data.float())
     #   Calculate error and back-propagate.
-    error_real = loss(prediction_real, ones_target(size))
+    error_real = loss(prediction_real, ones_target(1))
     error_real.backward()
 
     #   2) Train on fake data.
-    prediction_fake = D(fake_data)
+    prediction_fake = D(fake_data.float().t())
     #   Calculate error and back-propagate.
-    error_fake = loss(prediction_fake, zeros_target(size))
+    error_fake = loss(prediction_fake, zeros_target(1))
     error_fake.backward()
 
     #   3) Update weights with gradients.
@@ -159,10 +156,10 @@ def train_generator(optimiser, fake_data):
 
     #   Take a noise sample input and use it to generate fake data.
     #   Use discriminator to predict whether its real (1) or fake (0).
-    prediction = D(fake_data)
+    prediction = D(fake_data.float().t())
 
     #   Calculate error and back-propagate.
-    error = loss(prediction, ones_target(size))
+    error = loss(prediction, ones_target(1))
     error.backward()
 
     #   Update weights with gradients.
@@ -184,7 +181,62 @@ for epoch in range(num_epochs):
         #   1) Train Discriminator.
         real_data = real_batch
 
-        #   Generate fake data and detahc.
+        #   Generate fake data using generator and noise and detach so that gradients aren't calculated for generator.
+        fake_data_detached = G(noise(size, g_input_size)).detach()
+
+        #   Train D
+        d_error, d_pred_real, d_pred_fake = train_discriminator(d_optimiser, real_data, fake_data_detached)
+
+        #   2) Train Generator.
+        #   Generate fake data.
+        fake_data = G(noise(size, g_input_size))
+
+        #   Train G
+        g_error = train_generator(g_optimiser, fake_data)
+
+    plt.hist(fake_data.detach().numpy(), 10, density=True)
+    plt.show()
+
+
+
+
+"""for epoch in range(num_epochs):
+    for real_batch in trainloader:
+        print(real_batch)
+        # 1. Train D on real+fake
+        D.zero_grad()
+
+        #  1A: Train D on real data
+        d_real_data = D(real_batch.float())
+        d_real_prediction = D(d_real_data)
+        d_real_error = loss(d_real_prediction, torch.ones([1, 1]))  # ones = true
+        d_real_error.backward()  # compute/store gradients, but don't change params
+        print(d_real_data)
+    
+        #  1B: Train D on fake
+        d_gen_input = noise(batch_size, g_input_size)
+        d_fake_data = G(d_gen_input).detach()  # detach to avoid training G on these labels
+        d_fake_prediction = D(d_fake_data)
+        d_fake_error = loss(d_fake_prediction, torch.zeros([1, 1]))  # zeros = fake
+        d_fake_error.backward()
+        d_optimiser.step()  # Only optimizes D's parameters; changes based on stored gradients from backward()
+        print(d_fake_data)
+    
+        # 2. Train G on D's response (but DO NOT train D on these labels)
+        G.zero_grad()
+    
+        gen_input = noise(batch_size, g_input_size)
+        g_fake_data = G(gen_input)
+        dg_fake_decision = D(g_fake_data)
+        g_error = loss(dg_fake_decision, torch.ones([1, 1]))  # Train G to pretend it's genuine
+        print(g_fake_data)
+    
+        g_error.backward()
+        g_optimiser.step()  # Only optimizes G's parameters"""
+
+
+
+
 
 
 
