@@ -124,6 +124,9 @@ def train():
                       hidden_size=d_hidden_size,
                       output_size=d_output_size,
                       f=discriminator_activation_function)
+
+    print(G)
+    print(D)
     criterion = nn.BCELoss()  # Binary cross entropy: http://pytorch.org/docs/nn.html#bceloss
     d_optimizer = optim.SGD(D.parameters(), lr=d_learning_rate, momentum=sgd_momentum)
     g_optimizer = optim.SGD(G.parameters(), lr=g_learning_rate, momentum=sgd_momentum)
@@ -137,7 +140,6 @@ def train():
             d_real_data = d_sampler(d_input_size)
             #print(d_real_data.size())
             d_real_decision = D(preprocess(d_real_data))
-            print(d_real_decision.size())
             d_real_error = criterion(d_real_decision, Variable(torch.ones([1,1])))  # ones = true
             d_real_error.backward() # compute/store gradients, but don't change params
             #print(d_real_data)
@@ -145,6 +147,7 @@ def train():
             #  1B: Train D on fake
             d_gen_input = Variable(gi_sampler(minibatch_size, g_input_size))
             d_fake_data = G(d_gen_input).detach()  # detach to avoid training G on these labels
+            print(d_fake_data.size())
             d_fake_decision = D(preprocess(d_fake_data.t()))
             d_fake_error = criterion(d_fake_decision, Variable(torch.zeros([1,1])))  # zeros = fake
             d_fake_error.backward()
@@ -158,6 +161,7 @@ def train():
             G.zero_grad()
 
             gen_input = Variable(gi_sampler(minibatch_size, g_input_size))
+            print(gen_input.size())
             g_fake_data = G(gen_input)
             dg_fake_decision = D(preprocess(g_fake_data.t()))
             g_error = criterion(dg_fake_decision, Variable(torch.ones([1,1])))  # Train G to pretend it's genuine
