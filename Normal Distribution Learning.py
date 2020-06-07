@@ -175,16 +175,16 @@ def train():
         d_error_real = loss(d_prediction_real, torch.ones([1]))
         d_error_real.backward()
 
-        #   iii) Create noise and reshape, feed into Generator, output fake data.
+        #   iii) Create noise and reshape, feed into Generator, output fake data to train Discriminator on.
         noise = get_noise(n)
         noise = torch.reshape(noise, [n, 1])
-        fake_data = G(noise)
+        d_fake_data = G(noise)
 
         #   iii) Detach previously generated fake_data so that gradients aren't calculated for Generator.
         #   Use Discriminator to predict whether fake_data_detached is real (1) or fake (0).
         #   Calculate Discriminator error (should aim to output 0 (fake) for fake_data_detached) and back-propagate.
-        fake_data_detached = fake_data.detach()
-        d_prediction_fake_detached = D(fake_data_detached.t())
+        d_fake_data_detached = d_fake_data.detach()
+        d_prediction_fake_detached = D(d_fake_data_detached.t())
         d_error_fake = loss(d_prediction_fake_detached, torch.zeros([1]))
         d_error_fake.backward()
 
@@ -198,15 +198,15 @@ def train():
         #   Zero the gradients on each iteration.
         G.zero_grad()
 
-        #   i) Feed noise into Generator, output fake data.
-        fake_data = G(noise)
+        #   i) Feed noise into Generator, output fake data to use with Discriminator which in turn will train Generator.
+        g_fake_data = G(noise)
 
         #   ii) Use Discriminator to predict whether fake_data is real (1) or fake (0).
-        d_prediction_fake = D(fake_data.t())
+        dg_prediction_fake = D(g_fake_data.t())
 
         #   iii) Calculate Generator error (should aim to get Discriminator to produce value of 1 (real) for the
         #   fake_data is generated) and back-propagate.
-        g_error = loss(d_prediction_fake, torch.ones([1]))
+        g_error = loss(dg_prediction_fake, torch.ones([1]))
         g_error.backward()
 
         #   iv) Update g_optimiser weights with gradients.
@@ -219,7 +219,7 @@ def train():
 
         #   Calculating mu and sigma from generated fake_data (detached), then add to list.
         #   First convert fake_data to numpy array.
-        fake_data_detached_np = fake_data.detach().numpy()
+        fake_data_detached_np = g_fake_data.detach().numpy()
         mu_value = fake_data_detached_np.mean()
         sigma_value = fake_data_detached_np.std()
         mu_values.append(mu_value)
@@ -239,7 +239,6 @@ def train():
     plt.plot(g_errors)
     plt.plot(d_errors)
     plt.show()
-
 
 
 train()
