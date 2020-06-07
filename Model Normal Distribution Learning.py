@@ -137,6 +137,7 @@ def train():
             d_real_data = d_sampler(d_input_size)
             #print(d_real_data.size())
             d_real_decision = D(preprocess(d_real_data))
+            print(d_real_decision.size())
             d_real_error = criterion(d_real_decision, Variable(torch.ones([1,1])))  # ones = true
             d_real_error.backward() # compute/store gradients, but don't change params
             #print(d_real_data)

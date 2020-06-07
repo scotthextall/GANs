@@ -24,7 +24,7 @@ def get_real_data(mu, sigma, n):
 #   Function to create noise of size n to pass into generator. Generator will output fake data of size n.
 #   Linear inputs generated to make it more difficult for generator to trick discriminator.
 def get_noise(n):
-    noise = torch.rand(n)
+    noise = torch.randn(n)
     return noise
 
 
@@ -82,9 +82,13 @@ class Discriminator(nn.Module):
 #   Training the model.
 def train():
     #   Parameters
+    mu = 4.5    # Mean of the real normal distribution data.
+    sigma = 1.2     # Standard deviation of the real normal distribution data.
     n = 1000     # Size of the training set and number of neurons in the single layer Generator nn.
-    lr = 1e-3   # Learning rate of the optimisers/models.
-    num_epochs = 1   # Number of iterations to train models on.
+    lr = 1e-2   # Learning rate of the optimisers/models.
+    num_epochs = 5000   # Number of iterations to train models on.
+    d_steps = 20
+    g_steps = 20
 
     #   Initialising the Models
     G = Generator(n)
@@ -97,18 +101,83 @@ def train():
     #   Loss function (Binary Cross Entropy)
     loss = nn.BCELoss()
 
-    for epoch in range(num_epochs):
-        #   1)  Train Generator.
+    #   Lists to store errors of the generator and discriminator.
+    g_errors = []
+    d_errors = []
 
+    #   Lists to store mu and sigma of the generated fake_data.
+    mu_values = []
+    sigma_values = []
+
+    for epoch in range(num_epochs):
+        """1) Train Discriminator"""
+        #   Zero the gradients on each iteration.
+        d_optimiser.zero_grad()
+
+        #   i) Generate real data.
+        real_data = get_real_data(mu, sigma, n)
+        #   plt.hist(real_data, 100, density=True)
+
+        #   ii) Use Discriminator to predict whether real_data is real (1) or fake (0).
+        #   Calculate Discriminator error (should aim to output 1 (real) for real_data) and back-propagate.
+        d_prediction_real = D(real_data.float())
+        d_error_real = loss(d_prediction_real, torch.ones([1]))
+        d_error_real.backward()
+
+        #   iii) Detach previously generated fake_data so that gradients aren't calculated for Generator.
+        #   Use Discriminator to predict whether fake_data_detached is real (1) or fake (0).
+        #   Calculate Discriminator error (should aim to output 0 (fake) for fake_data_detached) and back-propagate.
+        noise = get_noise(n)
+        fake_data = G(noise)
+        fake_data_detached = fake_data.detach()
+        d_prediction_fake_detached = D(fake_data_detached)
+        d_error_fake = loss(d_prediction_fake_detached, torch.zeros([1]))
+        d_error_fake.backward()
+
+        #   iv) Update d_optimiser weights with gradients.
+        d_optimiser.step()
+
+        #   v) Total error in discriminator is d_error_fake + d_error_real.
+        d_error = d_error_fake + d_error_real
+
+        """2) Train Generator"""
         #   Zero the gradients on each iteration.
         g_optimiser.zero_grad()
 
-        #   Create random noise, feed into Generator, output fake data.
+        #   i) Create random noise, feed into Generator, output fake data.
         noise = get_noise(n)
-        generated_data = G(noise)
-        #print(generated_data)
-        #plt.hist(generated_data.detach().numpy(), 100, density=True)
-        #plt.show()
+        fake_data = G(noise)
+
+        #   ii) Use Discriminator to predict whether fake_data is real (1) or fake (0).
+        d_prediction_fake = D(fake_data)
+
+        #   iii) Calculate Generator error (should aim to get Discriminator to produce value of 1 (real) for the
+        #   fake_data is generated) and back-propagate.
+        g_error = loss(d_prediction_fake, torch.ones([1]))
+        g_error.backward()
+
+        #   iv) Update g_optimiser weights with gradients.
+        g_optimiser.step()
+
+        """3) Add errors and predicted mu and sigma to lists for future plotting."""
+        #   Adding errors to lists.
+        g_errors.append(g_error)
+        d_errors.append(d_error)
+
+        #   Calculating mu and sigma from generated fake_data (detached), then add to list.
+        #   First convert fake_data to numpy array.
+        fake_data_detached_np = fake_data.detach().numpy()
+        mu_value = fake_data_detached_np.mean()
+        sigma_value = fake_data_detached_np.std()
+        mu_values.append(mu_value)
+        sigma_values.append(sigma_value)
+
+        print(epoch)
+
+        """4) Plotting histogram of the generated fake_data to visualise how it changes as models are trained."""
+        if epoch % 100 == 0:
+            plt.hist(fake_data_detached_np, 100, density=True)
+            plt.show()
 
 
 train()
