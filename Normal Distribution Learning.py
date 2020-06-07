@@ -55,13 +55,13 @@ def train():
     mu = 4.5    # Mean of the real normal distribution data.
     sigma = 1.2     # Standard deviation of the real normal distribution data.
     n = 1000    # Size of the training set and number of neurons in the single layer Generator nn.
-    lr = 1e-3   # Learning rate of the optimisers/models.
+    lr = 1e-2   # Learning rate of the optimisers/models.
     num_epochs = 100000     # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
-    g_hidden_size = 50  # Number of nodes in Generator hidden layers.
+    g_hidden_size = 5   # Number of nodes in Generator hidden layers.
     g_output_size = 1   # Single node in Generator output layer -> Single fake value output.
     d_input_size = n    # n nodes in Discriminator input layer -> Takes n value input (Whole dataset).
-    d_hidden_size = 100 # Number of nodes in Discriminator hidden layers.
+    d_hidden_size = 10  # Number of nodes in Discriminator hidden layers.
     d_output_size = 1   # Single node in Discriminator output layer -> Single value 1 (real) or 0 (fake) output.
 
     #   Activation functions for the Generator and Discriminators.
@@ -79,9 +79,13 @@ def train():
                       f=d_activation_function)
 
     #   Optimisers which update/improve models
-    g_optimiser = torch.optim.Adam(G.parameters(), lr=lr)
-    d_optimiser = torch.optim.Adam(D.parameters(), lr=lr)
+    g_optimiser = torch.optim.SGD(G.parameters(), lr=lr, momentum=0.9)
+    d_optimiser = torch.optim.SGD(D.parameters(), lr=lr, momentum=0.9)
 
+    """g_optimiser = torch.optim.Adam(G.parameters(), lr=0.01, betas=(0.9, 0.999),
+                                   eps=1e-08, weight_decay=0, amsgrad=False)
+    d_optimiser = torch.optim.Adam(D.parameters(), lr=0.01, betas=(0.9, 0.999),
+                                   eps=1e-08, weight_decay=0, amsgrad=False)"""
     #   Loss function (Binary Cross Entropy)
     loss = nn.BCELoss()
 
