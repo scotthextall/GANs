@@ -24,7 +24,7 @@ def get_real_data(mu, sigma, n):
 #   Function to create noise of size n to pass into generator. Generator will output fake data of size n.
 #   Linear inputs generated to make it more difficult for generator to trick discriminator.
 def get_noise(n):
-    noise = torch.randn(n)
+    noise = torch.rand(n)
     return noise
 
 
@@ -117,7 +117,7 @@ def train():
     sigma = 1.2     # Standard deviation of the real normal distribution data.
     n = 1000     # Size of the training set and number of neurons in the single layer Generator nn.
     lr = 1e-2   # Learning rate of the optimisers/models.
-    num_epochs = 50000   # Number of iterations to train models on.
+    num_epochs = 100000   # Number of iterations to train models on.
     g_input_size = 1
     g_hidden_size = 50
     g_output_size = 1
@@ -139,8 +139,11 @@ def train():
                       f=d_activation_function)
 
     #   Optimisers which update/improve models
-    g_optimiser = torch.optim.Adam(G.parameters(), lr=lr)
-    d_optimiser = torch.optim.Adam(D.parameters(), lr=lr)
+    """g_optimiser = torch.optim.Adam(G.parameters(), lr=lr)
+    d_optimiser = torch.optim.Adam(D.parameters(), lr=lr)"""
+
+    g_optimiser = torch.optim.SGD(G.parameters(), lr=lr, momentum=0.9)
+    d_optimiser = torch.optim.SGD(D.parameters(), lr=lr, momentum=0.9)
 
     #   Loss function (Binary Cross Entropy)
     loss = nn.BCELoss()
@@ -160,7 +163,7 @@ def train():
     for epoch in range(num_epochs):
         """1) Train Discriminator"""
         #   Zero the gradients on each iteration.
-        d_optimiser.zero_grad()
+        D.zero_grad()
 
         #   i) Generate real data.
         real_data = get_real_data(mu, sigma, n)
@@ -193,7 +196,7 @@ def train():
 
         """2) Train Generator"""
         #   Zero the gradients on each iteration.
-        g_optimiser.zero_grad()
+        G.zero_grad()
 
         #   i) Feed noise into Generator, output fake data.
         fake_data = G(noise)
@@ -224,9 +227,13 @@ def train():
 
         #print(epoch)
 
-        """4) Plotting histogram of the generated fake_data to visualise how it changes as models are trained."""
         if epoch % 1000 == 0:
-            plt.hist(fake_data_detached_np, 100, density=True)
+            print(epoch)
+
+        """4) Plotting histogram of the generated fake_data to visualise how it changes as models are trained."""
+        if epoch % 10000 == 0:
+            plt.hist(real_data.detach().numpy(), bins=100, density=True)
+            plt.hist(fake_data_detached_np, bins=100, density=True)
             plt.show()
 
     plt.plot(g_errors)
