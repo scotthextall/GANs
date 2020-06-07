@@ -55,7 +55,7 @@ def train():
     #   Parameters
     mu = 4.5    # Mean of the real normal distribution data.
     sigma = 1.2     # Standard deviation of the real normal distribution data.
-    n = 1000    # Size of the training set and number of neurons in the single layer Generator nn.
+    n = 100    # Size of the training set and number of neurons in the single layer Generator nn.
     lr = 1e-2   # Learning rate of the optimisers/models.
     num_epochs = 100000     # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
@@ -169,8 +169,12 @@ def train():
         """4) Plotting histogram of the generated fake_data to visualise how it changes as models are trained."""
         if epoch % 10000 == 0:
             print("Mean: {}     Std_Dev: {}".format(fake_data_detached_np.mean(), fake_data_detached_np.std()))
-            plt.hist(real_data.detach().numpy(), bins=100, density=True)
-            plt.hist(fake_data_detached_np, bins=100, density=True)
+            """plt.hist(real_data.detach().numpy(), bins=100, density=True)
+            plt.hist(fake_data_detached_np, bins=100, density=True)"""
+            plt.hist(get_real_data(mu, sigma, 10000).numpy(), bins=100, density=True)
+            noise = get_noise(10000)
+            noise = torch.reshape(noise, [10000, 1])
+            plt.hist(G(noise).detach().numpy(), bins=100, density=True)
             plt.show()
 
     plt.plot(g_errors)
