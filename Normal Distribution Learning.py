@@ -17,7 +17,7 @@ def get_noise(n):
     noise = torch.rand(n)
     return noise
 
-
+#   Generator model. Neural network with 1 input layer, 2 hidden layers, 1 output layer.
 class Generator(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, f):
         super(Generator, self).__init__()
@@ -35,6 +35,7 @@ class Generator(nn.Module):
         return x
 
 
+#   Discriminator model. Neural network with 1 input layer, 2 hidden layers, 1 output layer.
 class Discriminator(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, f):
         super(Discriminator, self).__init__()
@@ -58,10 +59,10 @@ def train():
     lr = 1e-2   # Learning rate of the optimisers/models.
     num_epochs = 100000     # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
-    g_hidden_size = 5   # Number of nodes in Generator hidden layers.
+    g_hidden_size = 50   # Number of nodes in Generator hidden layers.
     g_output_size = 1   # Single node in Generator output layer -> Single fake value output.
     d_input_size = n    # n nodes in Discriminator input layer -> Takes n value input (Whole dataset).
-    d_hidden_size = 10  # Number of nodes in Discriminator hidden layers.
+    d_hidden_size = 100  # Number of nodes in Discriminator hidden layers.
     d_output_size = 1   # Single node in Discriminator output layer -> Single value 1 (real) or 0 (fake) output.
 
     #   Activation functions for the Generator and Discriminators.
