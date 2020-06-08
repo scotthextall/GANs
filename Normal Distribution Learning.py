@@ -59,10 +59,10 @@ def train():
     lr = 1e-3   # Learning rate of the optimisers/models.
     num_epochs = 1000000     # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
-    g_hidden_size = 50   # Number of nodes in Generator hidden layers.
+    g_hidden_size = 5   # Number of nodes in Generator hidden layers.
     g_output_size = 1   # Single node in Generator output layer -> Single fake value output.
     d_input_size = n    # n nodes in Discriminator input layer -> Takes n value input (Whole dataset).
-    d_hidden_size = 100  # Number of nodes in Discriminator hidden layers.
+    d_hidden_size = 10  # Number of nodes in Discriminator hidden layers.
     d_output_size = 1   # Single node in Discriminator output layer -> Single value 1 (real) or 0 (fake) output.
 
     #   Activation functions for the Generator and Discriminators.
