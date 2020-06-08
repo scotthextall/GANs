@@ -12,7 +12,6 @@ def get_real_data(mu, sigma, n):
 
 
 #   Function to create noise of size n to pass into generator. Generator will output fake data of size n.
-#   Linear inputs generated to make it more difficult for generator to trick discriminator.
 def get_noise(n):
     noise = torch.randn(n)
     return noise
@@ -125,7 +124,7 @@ def train():
             #   Calculate Discriminator error (should aim to output 0 (fake) for fake_data_detached) and back-propagate.
             d_fake_data_detached = d_fake_data.detach()
             d_prediction_fake_detached = D(d_fake_data_detached.t())
-            d_error_fake = loss(d_prediction_fake_detached, torch.zeros([1]))
+            d_error_fake = loss(d_prediction_fake_detached, torch.zeros([1, 1]))
             d_error_fake.backward()     # Compute/Store gradients.
 
             #   iv) Update d_optimiser weights with stored gradients.
@@ -151,7 +150,7 @@ def train():
 
             #   iii) Calculate Generator error (should aim to get Discriminator to produce value of 1 (real) for the
             #   fake_data is generated) and back-propagate.
-            g_error = loss(dg_prediction_fake, torch.ones([1]))
+            g_error = loss(dg_prediction_fake, torch.ones([1, 1]))
             g_error.backward()      # Compute/store gradients.
 
             #   iv) Update g_optimiser weights with stored gradients.
@@ -181,8 +180,6 @@ def train():
             noise = get_noise(10000)
             noise = torch.reshape(noise, [10000, 1])
             plt.hist(G(noise).detach().numpy(), bins=100, density=True)
-            plt.plot(g_errors)
-            plt.plot(d_errors)
             plt.show()
 
     plt.plot(g_errors)
