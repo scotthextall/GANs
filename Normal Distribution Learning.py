@@ -181,6 +181,8 @@ def train():
             noise = get_noise(10000)
             noise = torch.reshape(noise, [10000, 1])
             plt.hist(G(noise).detach().numpy(), bins=100, density=True)
+            plt.plot(g_errors)
+            plt.plot(d_errors)
             plt.show()
 
     plt.plot(g_errors)
