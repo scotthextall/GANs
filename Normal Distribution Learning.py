@@ -3,23 +3,6 @@ import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
 
-(name, preprocess, d_input_func) = ("Only 4 moments", lambda data: get_moments(data), lambda x: 4)
-
-print("Using data [%s]" % (name))
-
-
-def get_moments(d):
-    # Return the first 4 moments of the data provided
-    mean = torch.mean(d)
-    diffs = d - mean
-    var = torch.mean(torch.pow(diffs, 2.0))
-    std = torch.pow(var, 0.5)
-    zscores = diffs / std
-    skews = torch.mean(torch.pow(zscores, 3.0))
-    kurtoses = torch.mean(torch.pow(zscores, 4.0)) - 3.0  # excess kurtosis, should be 0 for Gaussian
-    final = torch.cat((mean.reshape(1,), std.reshape(1,), skews.reshape(1,), kurtoses.reshape(1,)))
-    return final
-
 
 #   Function to generate random normal distribution training data on the go. Also creates '1' labels to show it's real.
 def get_real_data(mu, sigma, n):
@@ -32,6 +15,7 @@ def get_real_data(mu, sigma, n):
 def get_noise(n):
     noise = torch.randn(n)
     return noise
+
 
 #   Generator model. Neural network with 1 input layer, 2 hidden layers, 1 output layer.
 class Generator(nn.Module):
@@ -101,9 +85,9 @@ def train():
     #   Optimisers which update/improve models
     """g_optimiser = torch.optim.SGD(G.parameters(), lr=lr, momentum=0.9)
     d_optimiser = torch.optim.SGD(D.parameters(), lr=lr, momentum=0.9)"""
-
     g_optimiser = torch.optim.Adam(G.parameters(), lr=g_lr, betas=(0.9, 0.999), eps=1e-8)
     d_optimiser = torch.optim.Adam(D.parameters(), lr=d_lr, betas=(0.9, 0.999), eps=1e-8)
+
     #   Loss function (Binary Cross Entropy)
     loss = nn.BCELoss()
 
@@ -126,7 +110,7 @@ def train():
 
             #   ii) Use Discriminator to predict whether real_data is real (1) or fake (0).
             #   Calculate Discriminator error (should aim to output 1 (real) for real_data) and back-propagate.
-            d_prediction_real = D(preprocess(real_data.float()))
+            d_prediction_real = D(real_data.float())
             d_error_real = loss(d_prediction_real, torch.ones([1]))
             d_error_real.backward()     # Compute/Store gradients.
 
@@ -139,7 +123,7 @@ def train():
             #   Use Discriminator to predict whether fake_data_detached is real (1) or fake (0).
             #   Calculate Discriminator error (should aim to output 0 (fake) for fake_data_detached) and back-propagate.
             d_fake_data_detached = d_fake_data.detach()
-            d_prediction_fake_detached = D(preprocess(d_fake_data_detached.t()))
+            d_prediction_fake_detached = D(d_fake_data_detached.t())
             d_error_fake = loss(d_prediction_fake_detached, torch.zeros([1, 1]))
             d_error_fake.backward()     # Compute/Store gradients.
 
@@ -162,7 +146,7 @@ def train():
             g_fake_data = G(noise)
 
             #   ii) Use Discriminator to predict whether fake_data is real (1) or fake (0).
-            dg_prediction_fake = D(preprocess(g_fake_data.t()))
+            dg_prediction_fake = D(g_fake_data.t())
 
             #   iii) Calculate Generator error (should aim to get Discriminator to produce value of 1 (real) for the
             #   fake_data is generated) and back-propagate.
