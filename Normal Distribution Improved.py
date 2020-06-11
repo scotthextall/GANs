@@ -49,12 +49,12 @@ class Discriminator(nn.Module):
 #   Training the model.
 def train():
     #   Parameters
-    mu = 10     # Mean of the real normal distribution data.
-    sigma = 2   # Standard deviation of the real normal distribution data.
+    mu = 10.0     # Mean of the real normal distribution data.
+    sigma = 2.0   # Standard deviation of the real normal distribution data.
     n = 25      # Size of the training batches.
     g_lr = 1e-3     # Learning rate of Generator optimiser.
     d_lr = 1.1e-3   # Learning rate of Discriminator optimiser.
-    num_epochs = 4000   # Number of iterations to train models on.
+    num_epochs = 5000   # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
     g_hidden_size = 5   # Number of nodes in Generator hidden layers.
     g_output_size = 1   # Single node in Generator output layer -> Single fake value output.
@@ -66,7 +66,6 @@ def train():
 
     #   Activation functions for the Generator and Discriminators. ELU = Exponential Linear Unit.
     #   See https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
-    #   https://pytorch.org/docs/master/generated/torch.nn.ELU.html
     g_activation_function = nn.ELU()
     d_activation_function = nn.ELU()
 
