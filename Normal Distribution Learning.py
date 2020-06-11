@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-#   Function to generate random normal distribution training data on the go. Also creates '1' labels to show it's real.
+#   Function to generate random normal distribution training data on the go.
 def get_real_data(mu, sigma, n):
     np_array = np.random.normal(mu, sigma, n)
     dataset = torch.tensor(np_array)
