@@ -57,7 +57,7 @@ def train():
     sigma = 1.2     # Standard deviation of the real normal distribution data.
     n = 25    # Size of the training batches.
     g_lr = 0.0001     # Learning rate of Generator optimiser.
-    d_lr = 0.0004     # Learning rate of Discriminator optimiser.
+    d_lr = 0.0006     # Learning rate of Discriminator optimiser.
     num_epochs = 20000     # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
     g_hidden_size = 5   # Number of nodes in Generator hidden layers.
@@ -65,8 +65,8 @@ def train():
     d_input_size = n    # n nodes in Discriminator input layer -> Takes n value input (Whole dataset).
     d_hidden_size = 10  # Number of nodes in Discriminator hidden layers.
     d_output_size = 1   # Single node in Discriminator output layer -> Single value 1 (real) or 0 (fake) output.
-    d_steps = 20    # Update Discriminator d_steps times before Generator.
-    g_steps = 20    # Update Generator g_steps times before Discriminator.
+    d_steps = 5    # Update Discriminator d_steps times before Generator.
+    g_steps = 10    # Update Generator g_steps times before Discriminator.
 
     #   Activation functions for the Generator and Discriminators.
     g_activation_function = torch.tanh
