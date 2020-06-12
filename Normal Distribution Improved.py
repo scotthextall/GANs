@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 
 #   Function to generate random normal distribution training data on the go.
