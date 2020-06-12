@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 
 #   Function to generate random normal distribution training data on the go.
@@ -52,8 +53,8 @@ def train():
     mu = 10.0     # Mean of the real normal distribution data.
     sigma = 2.0   # Standard deviation of the real normal distribution data.
     n = 25      # Size of the training batches.
-    g_lr = 1e-3     # Learning rate of Generator optimiser.
-    d_lr = 1.1e-3   # Learning rate of Discriminator optimiser.
+    g_lr = 7e-4     # Learning rate of Generator optimiser.
+    d_lr = 9e-4   # Learning rate of Discriminator optimiser.
     num_epochs = 5000   # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
     g_hidden_size = 5   # Number of nodes in Generator hidden layers.
@@ -65,6 +66,7 @@ def train():
     g_steps = 10    # Update Generator g_steps times before Discriminator.
 
     #   Activation functions for the Generator and Discriminators. ELU = Exponential Linear Unit.
+    #   Sigmoid used as Discriminator activation function as it has values between 0 and 1 -> Useful for classification.
     #   See https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
     g_activation_function = nn.ELU()
     d_activation_function = nn.ELU()
@@ -171,7 +173,7 @@ def train():
             print(epoch + 1)
 
         """4) Plotting histogram of the generated fake_data to visualise how it changes as models are trained."""
-        if (epoch+1) % 1000 == 0:
+        if (epoch+1) % 500 == 0:
             print("Mean: {}     Std_Dev: {}".format(fake_data_detached.mean(), fake_data_detached.std()))
             """plt.hist(real_data.detach().numpy(), bins=100, density=True)
             plt.hist(fake_data_detached_np, bins=100, density=True)"""
