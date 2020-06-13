@@ -38,3 +38,39 @@ def imshow(img):
 
 
 imshow(images)
+
+
+"""Discriminator and Generator Models"""
+
+#   Discriminator neural network.
+class Discriminator(nn.Module):
+    #   Each image is 28x28 in Fashion MNIST dataset, therefore input_size = 784.
+    #   output_size = 1 corresponding to 1 (real) or 0 (fake) classifier values.
+    def __init__(self):
+        super(Discriminator, self).__init__()
+        input_size = 784
+        output_size = 1
+
+    #   Three hidden layers, each followed by a Leaky-ReLU non-linearity and a Dropout layer to prevent over-fitting.
+        self.hidden1 = nn.Sequential(
+            nn.Linear(input_size, 1024),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3)
+        )
+        self.hidden2 = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3)
+        )
+        self.hidden3 = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3)
+        )
+
+    #   Output layer has sigmoid activation function, values between 0 and 1 -> suitable as a classifier.
+    #   See https://ml-cheatsheet.readthedocs.io/en/latest/activation_functions.html
+        self.out = nn.Sequential(
+            nn.Linear(256, output_size),
+            nn.Sigmoid()
+        )
