@@ -52,8 +52,8 @@ def train():
     mu = 10.0     # Mean of the real normal distribution data.
     sigma = 2.0   # Standard deviation of the real normal distribution data.
     n = 25      # Size of the training batches.
-    g_lr = 7e-4     # Learning rate of Generator optimiser.
-    d_lr = 9e-4   # Learning rate of Discriminator optimiser.
+    g_lr = 7e-4     # Learning rate of Generator.
+    d_lr = 9e-4     # Learning rate of Discriminator.
     num_epochs = 3000   # Number of iterations to train models on.
     g_input_size = 1    # Single node in Generator input layer -> Single value noise input.
     g_hidden_size = 5   # Number of nodes in Generator hidden layers.
