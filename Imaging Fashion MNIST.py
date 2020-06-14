@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import torchvision
 import torchvision.transforms as transforms
 
+#   https://github.com/soumith/ganhacks -> Used to implement many GAN improvements in this script.
+
 #   Transform function to convert Fashion-MNIST dataset to tensor.
 #   Normalises the dataset to contain values between -1 and 1 -> useful for the generator activation function later on.
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
@@ -13,7 +15,7 @@ transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5
 dataset = torchvision.datasets.FashionMNIST(root='./FashionMNIST', download=True, train=True, transform=transform)
 
 #   Number of images (from dataset) in each mini-batch sample produced by the dataloader.
-mb_size = 64
+mb_size = 100
 
 #   Create a loader that can iterate through dataset, taking mini-batch samples to train the GAN on.
 dataloader = torch.utils.data.DataLoader(dataset, shuffle=True, batch_size=mb_size)
@@ -163,6 +165,8 @@ def train():
     g_lr = 0.0002   # Generator learning rate.
     d_lr = 0.0002   # Discriminator learning rate.
     num_epochs = 200   # Number of epochs to train on.
+    d_steps = 5     # Train Discriminator d_steps times before Generator.
+    g_steps = 10     # Train Generator g_steps times before Discriminator
 
     #   Initialising Generator and Discriminator.
     G = Generator()
@@ -182,57 +186,66 @@ def train():
     for epoch in range(num_epochs):
         #   n_batch = index number of real_image. real_image = image taken from mini-batch of real images.
         for n_batch, (real_image, _) in enumerate(dataloader):
-            #   size = number of images contained in mini-batch.
+            #   size = number of real images contained in mini-batch.
             size = real_image.size(0)
+            for d_index in range(d_steps):
+                """1) Train Discriminator"""
+                #   Zero the gradients on each iteration.
+                D.zero_grad()
 
-            """1) Train Discriminator"""
-            #   Zero the gradients on each iteration.
-            D.zero_grad()
+                #   i) Convert real image to 1D vector of real values ('flattened' image).
+                real_data = image_to_vector(real_image)
 
-            #   i) Convert real image to 1D vector of real values ('flattened' image).
-            real_data = image_to_vector(real_image)
+                #   ii) Train Discriminator on real 'flattened' images.
+                d_predict_real = D(real_data)
+                d_error_real = loss(d_predict_real, ones_target(size))
+                d_error_real.backward()
 
-            #   ii) Train Discriminator on real 'flattened' images.
-            d_predict_real = D(real_data)
-            d_error_real = loss(d_predict_real, ones_target(size))
-            d_error_real.backward()
+                #   iii) Generate fake 'flattened' images (= size) and detach so gradients aren't calculated for Generator.
+                noise = get_noise(size)
+                fake_data = G(noise).detach()
 
-            #   iii) Generate fake 'flattened' images and detach so gradients aren't calculated for Generator.
-            noise = get_noise(size)
-            fake_data = G(noise).detach()
+                #   iv) Train Discriminator on fake 'flattened' images (no. of fake images = size).
+                d_predict_fake = D(fake_data)
+                d_error_fake = loss(d_predict_fake, zeros_target(size))
+                d_error_fake.backward()
 
-            #   iv) Train Discriminator on fake 'flattened' images.
-            d_predict_fake = D(fake_data)
-            d_error_fake = loss(d_predict_fake, zeros_target(size))
-            d_error_fake.backward()
+                #   v) Update Discriminator with stored gradients.
+                d_optimiser.step()
 
-            #   v) Update Discriminator with stored gradients.
-            d_optimiser.step()
+                #   vi) Add error to list on last loop.
+                if d_index == (d_steps - 1):
+                    d_errors.append(d_error_real + d_error_fake)
 
-            """2) Train Generator"""
-            #   Zero the gradients on each iteration.
-            G.zero_grad()
+            for g_index in range(g_steps):
+                """2) Train Generator"""
+                #   Zero the gradients on each iteration.
+                G.zero_grad()
 
-            #   i) Generate fake 'flattened' images.
-            noise = get_noise(size)
-            fake_data = G(noise)
+                #   i) Generate fake 'flattened' images (no. of fake images = size).
+                noise = get_noise(size)
+                fake_data = G(noise)
 
-            #   ii) Use Discriminator to train Generator.
-            dg_predict_fake = D(fake_data)
-            g_error = loss(dg_predict_fake, ones_target(size))
-            g_error.backward()
+                #   ii) Use Discriminator to train Generator.
+                dg_predict_fake = D(fake_data)
+                g_error = loss(dg_predict_fake, ones_target(size))
+                g_error.backward()
 
-            #   iii) Update Generator with stored gradients.
-            g_optimiser.step()
+                #   iii) Update Generator with stored gradients.
+                g_optimiser.step()
 
-            """3) Adding errors to lists"""
-            g_errors.append(g_error)
-            d_errors.append(d_error_real + d_error_fake)
+                #   iv) Add error to list on last loop.
+                if g_index == (g_steps - 1):
+                    g_errors.append(g_error)
 
         """4) Visualisation"""
         test_images = vector_to_image(G(get_noise(mb_size)).detach())
         test_images = test_images.view(mb_size, 1, 28, 28)
         imshow(test_images)
+        plt.plot(g_errors, label='Generator Error')
+        plt.plot(d_errors, label='Discriminator Error')
+        plt.legend(loc='upper left')
+        plt.show()
 
 
 train()
