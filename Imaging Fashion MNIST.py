@@ -165,8 +165,8 @@ def train():
     g_lr = 0.0002   # Generator learning rate.
     d_lr = 0.0002   # Discriminator learning rate.
     num_epochs = 200   # Number of epochs to train on.
-    d_steps = 5     # Train Discriminator d_steps times before Generator.
-    g_steps = 10     # Train Generator g_steps times before Discriminator
+    d_steps = 1     # Train Discriminator d_steps times before Generator.
+    g_steps = 1     # Train Generator g_steps times before Discriminator
 
     #   Initialising Generator and Discriminator.
     G = Generator()
